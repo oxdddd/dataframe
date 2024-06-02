@@ -1,26 +1,56 @@
 package org.jetbrains.kotlinx.dataframe.impl.columns
 
 import org.jetbrains.kotlinx.dataframe.AnyRow
+import org.jetbrains.kotlinx.dataframe.ColumnDataHolder
 import org.jetbrains.kotlinx.dataframe.DataColumn
 import org.jetbrains.kotlinx.dataframe.columns.ColumnGroup
 import org.jetbrains.kotlinx.dataframe.columns.ColumnResolutionContext
 import org.jetbrains.kotlinx.dataframe.columns.ValueColumn
+import org.jetbrains.kotlinx.dataframe.impl.isArray
+import org.jetbrains.kotlinx.dataframe.impl.isPrimitiveArray
+import org.jetbrains.kotlinx.dataframe.toColumnDataHolder
+import kotlin.reflect.KClass
 import kotlin.reflect.KType
+import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.withNullability
 
+private const val DEBUG = true
+
 internal open class ValueColumnImpl<T>(
-    values: List<T>,
+    values: ColumnDataHolder<T>,
     name: String,
     type: KType,
     val defaultValue: T? = null,
-    distinct: Lazy<Set<T>>? = null,
-) : DataColumnImpl<T>(values, name, type, distinct), ValueColumn<T> {
+) : DataColumnImpl<T>(values, name, type), ValueColumn<T> {
 
-    override fun distinct() = ValueColumnImpl(toSet().toList(), name, type, defaultValue, distinct)
+    private infix fun <T> T?.matches(type: KType) =
+        when {
+            this == null -> type.isMarkedNullable
+            this.isPrimitiveArray -> type.isPrimitiveArray &&
+                this!!::class.qualifiedName == type.classifier?.let { (it as KClass<*>).qualifiedName }
+            this.isArray -> type.isArray // cannot check the precise type of array
+            else -> this!!::class.isSubclassOf(type.classifier as KClass<*>)
+        }
 
-    override fun rename(newName: String) = ValueColumnImpl(values, newName, type, defaultValue, distinct)
+    init {
+        if (DEBUG) {
+            require(values.all { it matches type }) {
+                val types = values.map { if (it == null) "Nothing?" else it!!::class.simpleName }.distinct()
+                "Values of column '$name' have types '$types' which are not compatible given with column type '$type'"
+            }
+        }
+    }
 
-    override fun changeType(type: KType) = ValueColumnImpl(values, name, type, defaultValue, distinct)
+    override fun distinct() = ValueColumnImpl(
+        values = toSet().toColumnDataHolder(type, distinct),
+        name = name,
+        type = type,
+        defaultValue = defaultValue,
+    )
+
+    override fun rename(newName: String) = ValueColumnImpl(values, newName, type, defaultValue)
+
+    override fun changeType(type: KType) = ValueColumnImpl(values, name, type, defaultValue)
 
     override fun addParent(parent: ColumnGroup<*>): DataColumn<T> = ValueColumnWithParent(parent, this)
 
