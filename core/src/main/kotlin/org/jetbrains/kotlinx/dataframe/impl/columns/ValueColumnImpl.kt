@@ -6,15 +6,10 @@ import org.jetbrains.kotlinx.dataframe.DataColumn
 import org.jetbrains.kotlinx.dataframe.columns.ColumnGroup
 import org.jetbrains.kotlinx.dataframe.columns.ColumnResolutionContext
 import org.jetbrains.kotlinx.dataframe.columns.ValueColumn
-import org.jetbrains.kotlinx.dataframe.impl.isArray
-import org.jetbrains.kotlinx.dataframe.impl.isPrimitiveArray
 import org.jetbrains.kotlinx.dataframe.toColumnDataHolder
-import kotlin.reflect.KClass
 import kotlin.reflect.KType
-import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.withNullability
 
-private const val DEBUG = true
 
 internal open class ValueColumnImpl<T>(
     values: ColumnDataHolder<T>,
@@ -22,24 +17,6 @@ internal open class ValueColumnImpl<T>(
     type: KType,
     val defaultValue: T? = null,
 ) : DataColumnImpl<T>(values, name, type), ValueColumn<T> {
-
-    private infix fun <T> T?.matches(type: KType) =
-        when {
-            this == null -> type.isMarkedNullable
-            this.isPrimitiveArray -> type.isPrimitiveArray &&
-                this!!::class.qualifiedName == type.classifier?.let { (it as KClass<*>).qualifiedName }
-            this.isArray -> type.isArray // cannot check the precise type of array
-            else -> this!!::class.isSubclassOf(type.classifier as KClass<*>)
-        }
-
-    init {
-        if (DEBUG) {
-            require(values.all { it matches type }) {
-                val types = values.map { if (it == null) "Nothing?" else it!!::class.simpleName }.distinct()
-                "Values of column '$name' have types '$types' which are not compatible given with column type '$type'"
-            }
-        }
-    }
 
     override fun distinct() = ValueColumnImpl(
         values = toSet().toColumnDataHolder(type, distinct),
