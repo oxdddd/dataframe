@@ -4,6 +4,7 @@ import org.jetbrains.kotlinx.dataframe.plugin.SchemaProperty
 import org.jetbrains.kotlin.fir.declarations.FirClass
 import org.jetbrains.kotlin.fir.declarations.FirDeclarationDataKey
 import org.jetbrains.kotlin.fir.declarations.FirDeclarationDataRegistry
+import org.jetbrains.kotlin.fir.symbols.impl.FirNamedFunctionSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirRegularClassSymbol
 
 sealed interface CallShapeData {
@@ -18,3 +19,9 @@ sealed interface CallShapeData {
 object CallShapeAttribute : FirDeclarationDataKey()
 
 var FirClass.callShapeData: CallShapeData? by FirDeclarationDataRegistry.data(CallShapeAttribute)
+
+class OriginalSymbol(val symbol: FirNamedFunctionSymbol)
+
+object MyCall : FirDeclarationDataKey()
+
+var FirClass.myCall: OriginalSymbol? by FirDeclarationDataRegistry.data(MyCall)

@@ -47,6 +47,12 @@ public class DataFrameBlackBoxCodegenTestGenerated extends AbstractDataFrameBlac
   }
 
   @Test
+  @TestMetadata("convertNestedStructures.kt")
+  public void testConvertNestedStructures() {
+    runTest("testData/box/convertNestedStructures.kt");
+  }
+
+  @Test
   @TestMetadata("convertToDataFrame.kt")
   public void testConvertToDataFrame() {
     runTest("testData/box/convertToDataFrame.kt");
