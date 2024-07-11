@@ -35,3 +35,7 @@ ___
 ___
 * youtube ([notebook](notebooks/youtube/Youtube.ipynb)/[Datalore](https://datalore.jetbrains.com/view/notebook/uXH0VfIM6qrrmwPJnLBi0j)) &ndash;
 Explore YouTube videos with YouTube REST API and Kotlin Dataframe 
+
+---
+* 0.14.0 Dev Feature Overview [notebook](notebooks/feature_overviews/0.14.0/new_features.ipynb)
+Overview of new features available in 0.14.0-dev
