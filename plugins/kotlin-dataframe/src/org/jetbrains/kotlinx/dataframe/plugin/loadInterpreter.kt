@@ -72,6 +72,11 @@ import org.jetbrains.kotlinx.dataframe.plugin.impl.api.ReplaceUnfold1
 import org.jetbrains.kotlinx.dataframe.plugin.impl.api.ToDataFrame
 import org.jetbrains.kotlinx.dataframe.plugin.impl.api.ToDataFrameDefault
 import org.jetbrains.kotlinx.dataframe.plugin.impl.api.ToDataFrameDsl
+import org.jetbrains.kotlinx.dataframe.plugin.impl.api.All0
+import org.jetbrains.kotlinx.dataframe.plugin.impl.api.ColsAtAnyDepth0
+import org.jetbrains.kotlinx.dataframe.plugin.impl.api.ColsOf0
+import org.jetbrains.kotlinx.dataframe.plugin.impl.api.ColsOf1
+import org.jetbrains.kotlinx.dataframe.plugin.impl.api.FrameCols0
 import org.jetbrains.kotlinx.dataframe.plugin.impl.api.ToDataFrameFrom
 
 internal fun FirFunctionCall.loadInterpreter(session: FirSession): Interpreter<*>? {
@@ -79,6 +84,16 @@ internal fun FirFunctionCall.loadInterpreter(session: FirSession): Interpreter<*
         (calleeReference as? FirResolvedNamedReference)?.resolvedSymbol as? FirCallableSymbol ?: return null
     val argName = Name.identifier("interpreter")
     return symbol.annotations
+        .find { it.fqName(session)?.equals(INTERPRETABLE_FQNAME) ?: false }
+        ?.let { annotation ->
+            val name = (annotation.findArgumentByName(argName) as FirLiteralExpression).value as String
+            name.load<Interpreter<*>>()
+        }
+}
+
+internal fun FirCallableSymbol<*>.loadInterpreter(session: FirSession): Interpreter<*>? {
+    val argName = Name.identifier("interpreter")
+    return annotations
         .find { it.fqName(session)?.equals(INTERPRETABLE_FQNAME) ?: false }
         ?.let { annotation ->
             val name = (annotation.findArgumentByName(argName) as FirLiteralExpression).value as String
@@ -171,6 +186,11 @@ internal inline fun <reified T> String.load(): T {
         "toDataFrameDefault" -> ToDataFrameDefault()
         "Replace0" -> Replace0()
         "ReplaceUnfold1" -> ReplaceUnfold1()
+        "All0" -> All0()
+        "ColsOf0" -> ColsOf0()
+        "ColsOf1" -> ColsOf1()
+        "ColsAtAnyDepth0" -> ColsAtAnyDepth0()
+        "FrameCols0" -> FrameCols0()
         else -> error("$this")
     } as T
 }

@@ -47,6 +47,12 @@ public class DataFrameBlackBoxCodegenTestGenerated extends AbstractDataFrameBlac
   }
 
   @Test
+  @TestMetadata("convertNestedStructures.kt")
+  public void testConvertNestedStructures() {
+    runTest("testData/box/convertNestedStructures.kt");
+  }
+
+  @Test
   @TestMetadata("convertToDataFrame.kt")
   public void testConvertToDataFrame() {
     runTest("testData/box/convertToDataFrame.kt");
@@ -308,6 +314,12 @@ public class DataFrameBlackBoxCodegenTestGenerated extends AbstractDataFrameBlac
   @TestMetadata("selectThis.kt")
   public void testSelectThis() {
     runTest("testData/box/selectThis.kt");
+  }
+
+  @Test
+  @TestMetadata("selectionDsl.kt")
+  public void testSelectionDsl() {
+    runTest("testData/box/selectionDsl.kt");
   }
 
   @Test
